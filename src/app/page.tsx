@@ -57,7 +57,7 @@ export default function Home() {
 
       <div className="mt-5 px-2 lg:px-5 animate-slide-up">
         <h1 className="text-3xl font-bold text-center text-green-600 mb-6 animate-fade-in">Desa Panulisan Timur</h1>
-        <div className="relative mt-5" style={{ paddingBottom: "56.25%" }}>
+        <div className="relative mt-5">
           <div className="relative w-full h-screen">
             <iframe
               src="https://drive.google.com/file/d/1aSquZJRyYVQsti9sg1QWnGlo28VfLjyb/preview"
