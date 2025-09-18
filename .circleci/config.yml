@@ -1,0 +1,60 @@
+version: 2.1
+
+workflows:
+  deploy:
+    jobs:
+      - deploy-client:
+          filters:
+            branches:
+              only:
+                - dev
+          context:
+            - AWS
+            - dev
+      - deploy-client:
+          filters:
+            branches:
+              only:
+                - main
+          context:
+            - AWS
+            - prod
+
+jobs:
+  deploy-client:
+    resource_class: large
+    docker:
+      - image: cimg/node:18.18.2
+    steps:
+      - checkout
+      - restore_cache:
+          name: Restore Yarn Package Cache
+          keys:
+            - yarn-cache-{{ checksum "~/project/yarn.lock" }}
+      - run:
+          name: "Install Dependencies"
+          command: "yarn install --immutable"
+      - run: echo ${STAGE}
+      - run: rm -rf .env
+      - run: cp .env.${STAGE} .env
+      - run:
+          name: "Build Client App"
+          command: "yarn build"
+      - run: mkdir .next/standalone/public
+      - run: mkdir .next/standalone/.next/static
+      - run: cp -r public/* .next/standalone/public
+      - run: cp -r .next/static/* .next/standalone/.next/static
+      - run: sudo apt update
+      - run: sudo apt install tree
+      - run: tree
+      - run: sudo apt-get install rsync
+      - run: touch ~/.ssh/known_hosts
+      - run: ssh-keyscan -H 52.74.91.89 >> ~/.ssh/known_hosts
+      - run: rsync -avce ssh --delete .next/standalone/ ubuntu@52.74.91.89:~/app/kulakin-lp/${STAGE}
+      - run: rsync -avce ssh --delete ecosystem.config.${STAGE}.js ubuntu@52.74.91.89:~/app/kulakin-lp/${STAGE}/ecosystem.config.js
+      - save_cache:
+          name: Save Yarn Package Cache
+          key: yarn-cache-{{ checksum "~/project/yarn.lock" }}
+          paths:
+            - ~/project/node_modules
+            - ~/project/.next/cache

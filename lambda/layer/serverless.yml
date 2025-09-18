@@ -1,0 +1,27 @@
+service: erhanesia-kulakin-lp-layer
+frameworkVersion: "3"
+useDotenv: true
+
+provider:
+  name: aws
+  region: "ap-southeast-1"
+  runtime: nodejs20.x
+  memorySize: 1024
+  deploymentBucket:
+    name: powerhouze-serverless-artifacts
+  tags:
+    company: erhanesia
+    project: kulakin-lp
+    service: erhanesia-kulakin-lp-layer
+    stage: ${sls:stage}
+    tech: nextjs
+
+layers:
+  erhanesiaKulakinLp:
+    path: src
+    retain: true
+    compatibleRuntimes:
+      - nodejs20.x
+    package:
+      patterns:
+        - "nodejs/node20/node_modules/**/*"
